@@ -19,7 +19,7 @@ export const RouteSearch = ({ onSearch, loading }) => {
     });
   };
   
-  const useCurrentLocation = (isStart) => {
+  const getCurrentLocation = (isStart) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {

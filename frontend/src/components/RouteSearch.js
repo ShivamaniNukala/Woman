@@ -138,28 +138,35 @@ export const RouteSearch = ({ onSearch, loading }) => {
       </div>
       
       <div className="space-y-4">
-        <div className="space-y-2">
+        <div className="space-y-2 relative">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Starting Point</Label>
-          <div className="flex gap-2">
-            <Input
-              data-testid="start-lat-input"
-              placeholder="Latitude"
-              value={startLat}
-              onChange={(e) => setStartLat(e.target.value)}
-              type="number"
-              step="0.0001"
-              className="bg-slate-950/50 border-white/10 focus:border-primary"
-            />
-            <Input
-              data-testid="start-lng-input"
-              placeholder="Longitude"
-              value={startLng}
-              onChange={(e) => setStartLng(e.target.value)}
-              type="number"
-              step="0.0001"
-              className="bg-slate-950/50 border-white/10 focus:border-primary"
-            />
-          </div>
+          <Input
+            data-testid="start-location-input"
+            placeholder="Enter starting location"
+            value={startLocation}
+            onChange={(e) => handleInputChange(e.target.value, true)}
+            onFocus={() => {
+              setActiveSuggestion('start');
+              if (startLocation) {
+                handleInputChange(startLocation, true);
+              }
+            }}
+            className="bg-slate-950/50 border-white/10 focus:border-primary"
+          />
+          {activeSuggestion === 'start' && suggestions.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-white/10 rounded-lg shadow-xl max-h-48 overflow-y-auto custom-scrollbar">
+              {suggestions.map((loc, index) => (
+                <div
+                  key={index}
+                  onClick={() => selectSuggestion(loc, true)}
+                  className="px-4 py-2 hover:bg-primary/20 cursor-pointer text-sm"
+                  data-testid={`suggestion-${index}`}
+                >
+                  {loc}
+                </div>
+              ))}
+            </div>
+          )}
           <Button
             variant="ghost"
             size="sm"
@@ -168,32 +175,38 @@ export const RouteSearch = ({ onSearch, loading }) => {
             data-testid="use-current-location-start"
           >
             <MapPin className="h-4 w-4 mr-2" />
-            Use Current Location
+            Use Nearest Location
           </Button>
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-2 relative">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Destination</Label>
-          <div className="flex gap-2">
-            <Input
-              data-testid="end-lat-input"
-              placeholder="Latitude"
-              value={endLat}
-              onChange={(e) => setEndLat(e.target.value)}
-              type="number"
-              step="0.0001"
-              className="bg-slate-950/50 border-white/10 focus:border-primary"
-            />
-            <Input
-              data-testid="end-lng-input"
-              placeholder="Longitude"
-              value={endLng}
-              onChange={(e) => setEndLng(e.target.value)}
-              type="number"
-              step="0.0001"
-              className="bg-slate-950/50 border-white/10 focus:border-primary"
-            />
-          </div>
+          <Input
+            data-testid="end-location-input"
+            placeholder="Enter destination"
+            value={endLocation}
+            onChange={(e) => handleInputChange(e.target.value, false)}
+            onFocus={() => {
+              setActiveSuggestion('end');
+              if (endLocation) {
+                handleInputChange(endLocation, false);
+              }
+            }}
+            className="bg-slate-950/50 border-white/10 focus:border-primary"
+          />
+          {activeSuggestion === 'end' && suggestions.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-white/10 rounded-lg shadow-xl max-h-48 overflow-y-auto custom-scrollbar">
+              {suggestions.map((loc, index) => (
+                <div
+                  key={index}
+                  onClick={() => selectSuggestion(loc, false)}
+                  className="px-4 py-2 hover:bg-primary/20 cursor-pointer text-sm"
+                >
+                  {loc}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         
         <Button
@@ -204,6 +217,12 @@ export const RouteSearch = ({ onSearch, loading }) => {
         >
           {loading ? 'Calculating...' : 'Calculate Safest Route'}
         </Button>
+        
+        <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
+          <p className="text-xs text-muted-foreground">
+            <span className="font-semibold text-primary">Available Locations:</span> Gateway of India, Bandra, Andheri, Dadar, Colaba, Worli, Juhu Beach, Marine Drive, BKC, and more...
+          </p>
+        </div>
       </div>
     </div>
   );

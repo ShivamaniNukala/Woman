@@ -71,7 +71,7 @@ export const RouteSearch = ({ onSearch, loading }) => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => useCurrentLocation(true)}
+            onClick={() => getCurrentLocation(true)}
             className="w-full hover:bg-white/10"
             data-testid="use-current-location-start"
           >

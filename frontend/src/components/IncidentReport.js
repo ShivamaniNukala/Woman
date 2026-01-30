@@ -53,7 +53,7 @@ export const IncidentReport = ({ onReportSubmitted }) => {
     }
   };
   
-  const useCurrentLocation = () => {
+  const getCurrentLocationForIncident = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {

@@ -3,38 +3,130 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Navigation, MapPin } from 'lucide-react';
+import { toast } from 'sonner';
+
+// Sample location database for demo
+const LOCATIONS = {
+  'Gateway of India': { lat: 18.9220, lng: 72.8347 },
+  'Bandra Station': { lat: 19.0544, lng: 72.8406 },
+  'Andheri Station': { lat: 19.1197, lng: 72.8464 },
+  'Dadar Station': { lat: 19.0176, lng: 72.8561 },
+  'Colaba': { lat: 18.9067, lng: 72.8147 },
+  'Worli Sea Face': { lat: 19.0176, lng: 72.8147 },
+  'Powai Lake': { lat: 19.1197, lng: 72.9047 },
+  'Juhu Beach': { lat: 19.0896, lng: 72.8264 },
+  'Marine Drive': { lat: 18.9432, lng: 72.8236 },
+  'Chhatrapati Shivaji Terminus': { lat: 18.9398, lng: 72.8355 },
+  'BKC': { lat: 19.0653, lng: 72.8690 },
+  'Lower Parel': { lat: 19.0000, lng: 72.8300 },
+  'Goregaon Station': { lat: 19.1655, lng: 72.8495 },
+  'Malad Station': { lat: 19.1862, lng: 72.8486 },
+  'Borivali Station': { lat: 19.2304, lng: 72.8575 },
+};
 
 export const RouteSearch = ({ onSearch, loading }) => {
-  const [startLat, setStartLat] = useState('19.0760');
-  const [startLng, setStartLng] = useState('72.8777');
-  const [endLat, setEndLat] = useState('19.1136');
-  const [endLng, setEndLng] = useState('72.8697');
+  const [startLocation, setStartLocation] = useState('Bandra Station');
+  const [endLocation, setEndLocation] = useState('Andheri Station');
+  const [suggestions, setSuggestions] = useState([]);
+  const [activeSuggestion, setActiveSuggestion] = useState(null);
+  
+  const getCoordinates = (locationName) => {
+    const location = LOCATIONS[locationName];
+    if (location) {
+      return location;
+    }
+    // If exact match not found, try partial match
+    const partialMatch = Object.keys(LOCATIONS).find(key => 
+      key.toLowerCase().includes(locationName.toLowerCase())
+    );
+    return partialMatch ? LOCATIONS[partialMatch] : null;
+  };
   
   const handleSearch = () => {
+    const startCoords = getCoordinates(startLocation);
+    const endCoords = getCoordinates(endLocation);
+    
+    if (!startCoords || !endCoords) {
+      toast.error('Please select valid locations from the suggestions');
+      return;
+    }
+    
     onSearch({
-      start_lat: parseFloat(startLat),
-      start_lng: parseFloat(startLng),
-      end_lat: parseFloat(endLat),
-      end_lng: parseFloat(endLng),
+      start_lat: startCoords.lat,
+      start_lng: startCoords.lng,
+      end_lat: endCoords.lat,
+      end_lng: endCoords.lng,
     });
+  };
+  
+  const handleInputChange = (value, isStart) => {
+    if (isStart) {
+      setStartLocation(value);
+      setActiveSuggestion('start');
+    } else {
+      setEndLocation(value);
+      setActiveSuggestion('end');
+    }
+    
+    // Filter suggestions
+    if (value.length > 0) {
+      const filtered = Object.keys(LOCATIONS).filter(loc =>
+        loc.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filtered);
+    } else {
+      setSuggestions([]);
+    }
+  };
+  
+  const selectSuggestion = (location, isStart) => {
+    if (isStart) {
+      setStartLocation(location);
+    } else {
+      setEndLocation(location);
+    }
+    setSuggestions([]);
+    setActiveSuggestion(null);
   };
   
   const getCurrentLocation = (isStart) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          if (isStart) {
-            setStartLat(position.coords.latitude.toFixed(4));
-            setStartLng(position.coords.longitude.toFixed(4));
-          } else {
-            setEndLat(position.coords.latitude.toFixed(4));
-            setEndLng(position.coords.longitude.toFixed(4));
+          // For demo, find nearest location
+          const userLat = position.coords.latitude;
+          const userLng = position.coords.longitude;
+          
+          let nearest = null;
+          let minDist = Infinity;
+          
+          Object.entries(LOCATIONS).forEach(([name, coords]) => {
+            const dist = Math.sqrt(
+              Math.pow(coords.lat - userLat, 2) + 
+              Math.pow(coords.lng - userLng, 2)
+            );
+            if (dist < minDist) {
+              minDist = dist;
+              nearest = name;
+            }
+          });
+          
+          if (nearest) {
+            if (isStart) {
+              setStartLocation(nearest);
+            } else {
+              setEndLocation(nearest);
+            }
+            toast.success(`Using nearest location: ${nearest}`);
           }
         },
         (error) => {
           console.error('Error getting location:', error);
+          toast.error('Could not get your location');
         }
       );
+    } else {
+      toast.error('Geolocation not supported');
     }
   };
   

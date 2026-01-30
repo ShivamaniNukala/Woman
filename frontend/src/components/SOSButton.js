@@ -22,7 +22,7 @@ export const SOSButton = ({ emergencyContacts = [] }) => {
       <Button
         data-testid="sos-button"
         onClick={handleSOSClick}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-destructive text-white hover:bg-destructive/90 shadow-[0_0_30px_-5px_rgba(249,115,22,0.8)] animate-pulse-ring z-50"
+        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-destructive text-white hover:bg-destructive/90 hover:scale-110 shadow-[0_0_30px_-5px_rgba(249,115,22,0.8)] transition-all z-50"
       >
         <AlertTriangle className="h-8 w-8" />
       </Button>
